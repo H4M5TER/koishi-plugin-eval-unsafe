@@ -17,20 +17,23 @@ export function apply(ctx: Context) {
     authority: 4,
     captureQuote: false,
   }).action(async (argv, code) => {
+    if (!code.includes('return')) {
+      code = `return (${code})`
+    }
     const session = argv.session
     const expose = {
       require,
       ...require('koishi'),
       ctx,
       session,
-      // user: session.user,
-      // channel: session.channel,
-      // guild: session.guild,
-      // userId: session.userId,
-      // channelId: session.channelId,
-      // guildId: session.guildId,
-      // selfId: session.selfId,
-      // app: session.app,
+      user: session.user,
+      channel: session.channel,
+      guild: session.guild,
+      userId: session.userId,
+      channelId: session.channelId,
+      guildId: session.guildId,
+      selfId: session.selfId,
+      app: session.app,
       logger,
       bot: session.bot,
       argv,
@@ -41,7 +44,7 @@ export function apply(ctx: Context) {
     }
 
     async function __eval_wrapper__() {
-      const func: Function = AsyncFunction(
+      const func: (args: typeof expose) => Promise<any> = AsyncFunction(
         `{ ${Object.keys(expose).join(', ')} }`,
         code,
       )
